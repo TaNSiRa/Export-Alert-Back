@@ -30,6 +30,7 @@ const config = {
 
 exports.qurey = async (input) => {
   try {
+    let out;
     await sql.connect(config)
     const result = await sql.query(input).then((v) => {
       // console.log(`---------------`);
@@ -39,8 +40,8 @@ exports.qurey = async (input) => {
       return v;
 
     }).then(() => sql.close())
-
-    //  console.dir(result)
+    console.log(".query : ", input);
+    // console.log(result)
     return out;
   } catch (err) {
     sql.close()

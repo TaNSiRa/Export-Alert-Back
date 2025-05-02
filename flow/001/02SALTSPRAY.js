@@ -18,16 +18,37 @@ router.post('/02SALTSPRAY/DataTable', async (req, res) => {
     console.log("--DataTable--");
     //-------------------------------------
     let output = [];
-    let query = `SELECT * From [SALTSPRAY].[dbo].[DataTable] `
+    let query = `SELECT * From [SALTSPRAY].[dbo].[DataTable] ORDER BY Request_No`;
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
-        console.log("Alldata: " + buffer.length);
+        // console.log("Alldata: " + buffer.length);
+        // console.log(buffer);
         output = buffer;
         return res.status(200).json(output);
     } else {
         return res.status(400).json('ไม่พบข้อมูลในตาราง');
+    }
+    //-------------------------------------
+});
+
+router.post('/02SALTSPRAY/InstrumentStatus', async (req, res) => {
+    //-------------------------------------
+    console.log("--InstrumentStatus--");
+    //-------------------------------------
+    let output = [];
+    let query = `SELECT * From [SALTSPRAY].[dbo].[Instrument_Status]`;
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        // console.log("Alldata2: " + buffer.length);
+        // console.log(buffer);
+        output = buffer;
+        return res.status(200).json(output);
+    } else {
+        return res.status(400).json('ไม่พบข้อมูลสถานะ');
     }
     //-------------------------------------
 });
@@ -185,6 +206,121 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
         SET ${fields.join(',\n')}
         WHERE Request_No = '${dataRow.REQUESTNO}'
         `;
+    console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Update Success");
+        return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
+        // return res.status(400).json('อัปเดทข้อมูลสำเร็จ');
+    } else {
+        console.log("Update Failed");
+        return res.status(400).json('อัปเดทข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02SALTSPRAY/AddData', async (req, res) => {
+    //-------------------------------------
+    console.log("--AddData--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+    console.log(dataRow);
+
+    let fields = [];
+    function pushField(name, value) {
+        if (value !== '' && value !== null && value !== 'null') {
+            fields.push(`[${name}] = '${value}'`);
+        }
+    }
+
+    pushField("Request_No", dataRow.REQUESTNO);
+    pushField("Report_No", dataRow.REPORTNO);
+    pushField("Section", dataRow.SECTION);
+    pushField("Requester", dataRow.REQUESTER);
+    pushField("Received_Date", dataRow.RECEIVEDDATE);
+    pushField("Customer_Name", dataRow.CUSTOMERNAME);
+    pushField("Part_Name1", dataRow.PARTNAME1);
+    pushField("Part_No1", dataRow.PARTNO1);
+    pushField("Part_Name2", dataRow.PARTNAME2);
+    pushField("Part_No2", dataRow.PARTNO2);
+    pushField("Part_Name3", dataRow.PARTNAME3);
+    pushField("Part_No3", dataRow.PARTNO3);
+    pushField("Part_Name4", dataRow.PARTNAME4);
+    pushField("Part_No4", dataRow.PARTNO4);
+    pushField("Part_Name5", dataRow.PARTNAME5);
+    pushField("Part_No5", dataRow.PARTNO5);
+    pushField("Part_Name6", dataRow.PARTNAME6);
+    pushField("Part_No6", dataRow.PARTNO6);
+    pushField("Part_Name7", dataRow.PARTNAME7);
+    pushField("Part_No7", dataRow.PARTNO7);
+    pushField("Part_Name8", dataRow.PARTNAME8);
+    pushField("Part_No8", dataRow.PARTNO8);
+    pushField("Part_Name9", dataRow.PARTNAME9);
+    pushField("Part_No9", dataRow.PARTNO9);
+    pushField("Part_Name10", dataRow.PARTNAME10);
+    pushField("Part_No10", dataRow.PARTNO10);
+    pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
+    pushField("Take_Photo", dataRow.TAKEPHOTO);
+    pushField("Start_Date", dataRow.STARTDATE);
+    pushField("Time1", dataRow.TIME1);
+    pushField("Finish_Date1", dataRow.FINISHDATE1);
+    pushField("Temp_Date1", dataRow.TEMPDATE1);
+    pushField("Due_Date1", dataRow.DUEDATE1);
+    pushField("Time2", dataRow.TIME2);
+    pushField("Finish_Date2", dataRow.FINISHDATE2);
+    pushField("Temp_Date2", dataRow.TEMPDATE2);
+    pushField("Due_Date2", dataRow.DUEDATE2);
+    pushField("Time3", dataRow.TIME3);
+    pushField("Finish_Date3", dataRow.FINISHDATE3);
+    pushField("Temp_Date3", dataRow.TEMPDATE3);
+    pushField("Due_Date3", dataRow.DUEDATE3);
+    pushField("Time4", dataRow.TIME4);
+    pushField("Finish_Date4", dataRow.FINISHDATE4);
+    pushField("Temp_Date4", dataRow.TEMPDATE4);
+    pushField("Due_Date4", dataRow.DUEDATE4);
+    pushField("Time5", dataRow.TIME5);
+    pushField("Finish_Date5", dataRow.FINISHDATE5);
+    pushField("Temp_Date5", dataRow.TEMPDATE5);
+    pushField("Due_Date5", dataRow.DUEDATE5);
+    pushField("Time6", dataRow.TIME6);
+    pushField("Finish_Date6", dataRow.FINISHDATE6);
+    pushField("Temp_Date6", dataRow.TEMPDATE6);
+    pushField("Due_Date6", dataRow.DUEDATE6);
+    pushField("Time7", dataRow.TIME7);
+    pushField("Finish_Date7", dataRow.FINISHDATE7);
+    pushField("Temp_Date7", dataRow.TEMPDATE7);
+    pushField("Due_Date7", dataRow.DUEDATE7);
+    pushField("Time8", dataRow.TIME8);
+    pushField("Finish_Date8", dataRow.FINISHDATE8);
+    pushField("Temp_Date8", dataRow.TEMPDATE8);
+    pushField("Due_Date8", dataRow.DUEDATE8);
+    pushField("Time9", dataRow.TIME9);
+    pushField("Finish_Date9", dataRow.FINISHDATE9);
+    pushField("Temp_Date9", dataRow.TEMPDATE9);
+    pushField("Due_Date9", dataRow.DUEDATE9);
+    pushField("Time10", dataRow.TIME10);
+    pushField("Finish_Date10", dataRow.FINISHDATE10);
+    pushField("Temp_Date10", dataRow.TEMPDATE10);
+    pushField("Due_Date10", dataRow.DUEDATE10);
+    pushField("Instrument", dataRow.INSTRUMENT);
+    pushField("Method", dataRow.METHOD);
+    pushField("Incharge", dataRow.INCHARGE);
+    pushField("Approved_Date", dataRow.APPROVEDDATE);
+    pushField("Approved_By", dataRow.APPROVEDBY);
+    pushField("Status", dataRow.STATUS);
+    pushField("Remark", dataRow.REMARK);
+    pushField("CheckBox", dataRow.CHECKBOX);
+
+    let query = `
+    INSERT INTO [SALTSPRAY].[dbo].[DataTable] (
+      ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+    )
+    VALUES (
+      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+    )
+    `;
     console.log(query);
     let db = await mssql.qurey(query);
     // console.log(db);
