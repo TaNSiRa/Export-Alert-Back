@@ -40,7 +40,7 @@ exports.qurey = async (input) => {
       return v;
 
     }).then(() => sql.close())
-    console.log(".query : ", input);
+    // console.log(".query : ", input);
     // console.log(result)
     return out;
   } catch (err) {
