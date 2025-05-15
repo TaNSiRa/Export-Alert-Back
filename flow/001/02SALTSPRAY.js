@@ -1,12 +1,6 @@
 const express = require("express");
 const router = express.Router();
 var mssql = require('../../function/mssql');
-var mssqlR = require('../../function/mssqlR');
-var mongodb = require('../../function/mongodb');
-var httpreq = require('../../function/axios');
-var axios = require('axios');
-const e = require("express");
-const schedule = require("node-schedule");
 
 router.get('/02SARKPI/TEST', async (req, res) => {
     // console.log(mssql.qurey())
@@ -114,12 +108,14 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     console.log("--EditData--");
     //-------------------------------------
     let dataRow = JSON.parse(req.body.dataRow);
-    console.log(dataRow);
+    // console.log(dataRow);
 
     let fields = [];
     function pushField(name, value) {
         if (value !== '') {
             fields.push(`[${name}] = '${value}'`);
+        } else {
+            fields.push(`[${name}] = NULL`);
         }
     }
 
@@ -206,7 +202,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
         SET ${fields.join(',\n')}
         WHERE Request_No = '${dataRow.REQUESTNO}'
         `;
-    console.log(query);
+    // console.log(query);
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["rowsAffected"][0] > 0) {
@@ -226,7 +222,7 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     console.log("--AddData--");
     //-------------------------------------
     let dataRow = JSON.parse(req.body.dataRow);
-    console.log(dataRow);
+    // console.log(dataRow);
 
     let fields = [];
     function pushField(name, value) {
@@ -321,7 +317,7 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
       ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
     )
     `;
-    console.log(query);
+    // console.log(query);
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["rowsAffected"][0] > 0) {
