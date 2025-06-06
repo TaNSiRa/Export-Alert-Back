@@ -31,11 +31,11 @@ io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
   // รับ event 'update-data' จาก client A
-  socket.on('update-data', (data) => {
+  socket.on('Close-popup', (data) => {
     console.log('Received data:', data);
 
     // ส่งข้อมูลนี้ไปให้ client อื่น (ไม่รวมผู้ส่งเอง)
-    socket.broadcast.emit('refresh-ui', data);
+    socket.broadcast.emit('Close popup', data);
   });
 
   socket.on('disconnect', () => {
