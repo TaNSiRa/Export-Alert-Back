@@ -7,6 +7,37 @@ router.get('/02SARKPI/TEST', async (req, res) => {
     return res.json("SARKPI V0.1");
 });
 
+router.post('/02SALTSPRAY/Login', async (req, res) => {
+    //-------------------------------------
+    console.log(req.body);
+    let input = req.body;
+    //-------------------------------------
+    let output = { "return": 'NOK' }
+    let query = `SELECT  *  FROM [SALTSPRAY].[dbo].[Master_User] WHERE [UserName] LIKE '${input['UserName']}'`;
+    let findDB = await mssql.qurey(query);
+    try {
+        if (findDB['recordsets'].length > 0) {
+            console.log(findDB['recordsets']);
+            if (findDB['recordsets'][0][0]['Password'] === input['Password']) {
+                output = {
+                    "UserName": findDB['recordsets'][0][0]['UserName'],
+                    "NAME": findDB['recordsets'][0][0]['Name'],
+                    "Section": findDB['recordsets'][0][0]['Section'],
+                    "Roleid": findDB['recordsets'][0][0]['Roleid'] || '1',
+                    "Branch": findDB['recordsets'][0][0]['Branch'],
+                    "return": 'OK'
+                }
+            } else {
+                output = { "return": 'PASSWORD INCORRECT' }
+            }
+
+        }
+    } catch {
+
+    }
+    return res.json(output);
+});
+
 router.post('/02SALTSPRAY/DataTable', async (req, res) => {
     //-------------------------------------
     console.log("--DataTable--");
@@ -215,7 +246,7 @@ router.post('/02SALTSPRAY/EditStatusJob', async (req, res) => {
     let output = [];
     let query = `UPDATE [SALTSPRAY].[dbo].[DataTable]
         SET Status = '${req.body.Status}'
-        WHERE Instrument = '${req.body.Instrument}' and Status != 'TRANSFER' and Status != 'FINISH'`;
+        WHERE Instrument = '${req.body.Instrument}' and Status != 'TRANSFER' and Status != 'FINISH' and Status != 'PM'`;
     let db = await mssql.qurey(query);
     // console.log(query);
     if (db["rowsAffected"][0] > 0) {
@@ -393,7 +424,7 @@ router.post('/02SALTSPRAY/SearchIncharge', async (req, res) => {
     console.log("--SearchIncharge--");
     //-------------------------------------
     let output = [];
-    let query = `SELECT * From [SALTSPRAY].[dbo].[Incharge] order by Incharge`
+    let query = `SELECT Id, Name, Email, Section, Branch, Roleid From [SALTSPRAY].[dbo].[Master_User] order by Name`
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["recordsets"].length > 0) {
@@ -405,6 +436,51 @@ router.post('/02SALTSPRAY/SearchIncharge', async (req, res) => {
         // return res.status(400).json('ไม่พบข้อมูลลูกค้า');
     } else {
         return res.status(400).json('ไม่พบข้อมูลผู้รับผิดชอบ');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02SALTSPRAY/CheckOldPassword', async (req, res) => {
+    //-------------------------------------
+    console.log("--CheckOldPassword--");
+    //-------------------------------------
+    // console.log(req.body);
+    let query = `SELECT * From [SALTSPRAY].[dbo].[Master_User] WHERE UserName = '${req.body.UserName}' 
+                AND Password = '${req.body.OldPassword}'`;
+    let db = await mssql.qurey(query);
+    // console.log(query);
+    // console.log(db);
+    if (db["recordset"].length > 0) {
+        console.log('200');
+        return res.status(200).json();
+    } else {
+        console.log('400');
+        return res.status(400).json('Old Password ไม่ถูกต้อง');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02SALTSPRAY/UpdatePassword', async (req, res) => {
+    //-------------------------------------
+    console.log("--UpdatePassword--");
+    //-------------------------------------
+    let query = `
+        UPDATE [SALTSPRAY].[dbo].[Master_User]
+        SET Password = '${req.body.NewPassword}'
+        WHERE UserName = '${req.body.UserName}'
+        `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Update Success");
+        return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
+        // return res.status(400).json('อัปเดทข้อมูลสำเร็จ');
+    } else {
+        console.log("Update Failed");
+        return res.status(400).json('อัปเดทข้อมูลไม่สำเร็จ');
     }
     //-------------------------------------
 
@@ -427,7 +503,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     console.log("--EditData--");
     //-------------------------------------
     let dataRow = JSON.parse(req.body.dataRow);
-    // console.log(dataRow);
+    console.log(dataRow);
 
     let fields = [];
     function pushField(name, value) {
@@ -442,29 +518,70 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     pushField("Report_No", dataRow.REPORTNO);
     pushField("Section", dataRow.SECTION);
     pushField("Requester", dataRow.REQUESTER);
+    pushField("Sampling_Date", dataRow.SAMPLINGDATE);
     pushField("Received_Date", dataRow.RECEIVEDDATE);
     pushField("Customer_Name", dataRow.CUSTOMERNAME);
     pushField("Part_Name1", dataRow.PARTNAME1);
     pushField("Part_No1", dataRow.PARTNO1);
+    pushField("Lot_No1", dataRow.LOTNO1);
+    pushField("Amount1", dataRow.AMOUNT1);
+    pushField("Material1", dataRow.MATERIAL1);
+    pushField("Process1", dataRow.PROCESS1);
     pushField("Part_Name2", dataRow.PARTNAME2);
     pushField("Part_No2", dataRow.PARTNO2);
+    pushField("Lot_No2", dataRow.LOTNO2);
+    pushField("Amount2", dataRow.AMOUNT2);
+    pushField("Material2", dataRow.MATERIAL2);
+    pushField("Process2", dataRow.PROCESS2);
     pushField("Part_Name3", dataRow.PARTNAME3);
     pushField("Part_No3", dataRow.PARTNO3);
+    pushField("Lot_No3", dataRow.LOTNO3);
+    pushField("Amount3", dataRow.AMOUNT3);
+    pushField("Material3", dataRow.MATERIAL3);
+    pushField("Process3", dataRow.PROCESS3);
     pushField("Part_Name4", dataRow.PARTNAME4);
     pushField("Part_No4", dataRow.PARTNO4);
+    pushField("Lot_No4", dataRow.LOTNO4);
+    pushField("Amount4", dataRow.AMOUNT4);
+    pushField("Material4", dataRow.MATERIAL4);
+    pushField("Process4", dataRow.PROCESS4);
     pushField("Part_Name5", dataRow.PARTNAME5);
     pushField("Part_No5", dataRow.PARTNO5);
+    pushField("Lot_No5", dataRow.LOTNO5);
+    pushField("Amount5", dataRow.AMOUNT5);
+    pushField("Material5", dataRow.MATERIAL5);
+    pushField("Process5", dataRow.PROCESS5);
     pushField("Part_Name6", dataRow.PARTNAME6);
     pushField("Part_No6", dataRow.PARTNO6);
+    pushField("Lot_No6", dataRow.LOTNO6);
+    pushField("Amount6", dataRow.AMOUNT6);
+    pushField("Material6", dataRow.MATERIAL6);
+    pushField("Process6", dataRow.PROCESS6);
     pushField("Part_Name7", dataRow.PARTNAME7);
     pushField("Part_No7", dataRow.PARTNO7);
+    pushField("Lot_No7", dataRow.LOTNO7);
+    pushField("Amount7", dataRow.AMOUNT7);
+    pushField("Material7", dataRow.MATERIAL7);
+    pushField("Process7", dataRow.PROCESS7);
     pushField("Part_Name8", dataRow.PARTNAME8);
     pushField("Part_No8", dataRow.PARTNO8);
+    pushField("Lot_No8", dataRow.LOTNO8);
+    pushField("Amount8", dataRow.AMOUNT8);
+    pushField("Material8", dataRow.MATERIAL8);
+    pushField("Process8", dataRow.PROCESS8);
     pushField("Part_Name9", dataRow.PARTNAME9);
     pushField("Part_No9", dataRow.PARTNO9);
+    pushField("Lot_No9", dataRow.LOTNO9);
+    pushField("Amount9", dataRow.AMOUNT9);
+    pushField("Material9", dataRow.MATERIAL9);
+    pushField("Process9", dataRow.PROCESS9);
     pushField("Part_Name10", dataRow.PARTNAME10);
     pushField("Part_No10", dataRow.PARTNO10);
-    pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
+    pushField("Lot_No10", dataRow.LOTNO10);
+    pushField("Amount10", dataRow.AMOUNT10);
+    pushField("Material10", dataRow.MATERIAL10);
+    pushField("Process10", dataRow.PROCESS10);
+    // pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
     pushField("Take_Photo", dataRow.TAKEPHOTO);
     pushField("Start_Date", dataRow.STARTDATE);
     pushField("Time1", dataRow.TIME1);
@@ -507,6 +624,8 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     pushField("Finish_Date10", dataRow.FINISHDATE10);
     pushField("Temp_Date10", dataRow.TEMPDATE10);
     pushField("Due_Date10", dataRow.DUEDATE10);
+    pushField("Temp_Date0", dataRow.TEMPDATE0);
+    pushField("Due_Date0", dataRow.DUEDATE0);
     pushField("Instrument", dataRow.INSTRUMENT);
     pushField("Method", dataRow.METHOD);
     pushField("Incharge", dataRow.INCHARGE);
@@ -560,25 +679,65 @@ router.post('/02SALTSPRAY/StartJob', async (req, res) => {
     pushField("Customer_Name", dataRow.CUSTOMERNAME);
     pushField("Part_Name1", dataRow.PARTNAME1);
     pushField("Part_No1", dataRow.PARTNO1);
+    pushField("Lot_No1", dataRow.LOTNO1);
+    pushField("Amount1", dataRow.AMOUNT1);
+    pushField("Material1", dataRow.MATERIAL1);
+    pushField("Process1", dataRow.PROCESS1);
     pushField("Part_Name2", dataRow.PARTNAME2);
     pushField("Part_No2", dataRow.PARTNO2);
+    pushField("Lot_No2", dataRow.LOTNO2);
+    pushField("Amount2", dataRow.AMOUNT2);
+    pushField("Material2", dataRow.MATERIAL2);
+    pushField("Process2", dataRow.PROCESS2);
     pushField("Part_Name3", dataRow.PARTNAME3);
     pushField("Part_No3", dataRow.PARTNO3);
+    pushField("Lot_No3", dataRow.LOTNO3);
+    pushField("Amount3", dataRow.AMOUNT3);
+    pushField("Material3", dataRow.MATERIAL3);
+    pushField("Process3", dataRow.PROCESS3);
     pushField("Part_Name4", dataRow.PARTNAME4);
     pushField("Part_No4", dataRow.PARTNO4);
+    pushField("Lot_No4", dataRow.LOTNO4);
+    pushField("Amount4", dataRow.AMOUNT4);
+    pushField("Material4", dataRow.MATERIAL4);
+    pushField("Process4", dataRow.PROCESS4);
     pushField("Part_Name5", dataRow.PARTNAME5);
     pushField("Part_No5", dataRow.PARTNO5);
+    pushField("Lot_No5", dataRow.LOTNO5);
+    pushField("Amount5", dataRow.AMOUNT5);
+    pushField("Material5", dataRow.MATERIAL5);
+    pushField("Process5", dataRow.PROCESS5);
     pushField("Part_Name6", dataRow.PARTNAME6);
     pushField("Part_No6", dataRow.PARTNO6);
+    pushField("Lot_No6", dataRow.LOTNO6);
+    pushField("Amount6", dataRow.AMOUNT6);
+    pushField("Material6", dataRow.MATERIAL6);
+    pushField("Process6", dataRow.PROCESS6);
     pushField("Part_Name7", dataRow.PARTNAME7);
     pushField("Part_No7", dataRow.PARTNO7);
+    pushField("Lot_No7", dataRow.LOTNO7);
+    pushField("Amount7", dataRow.AMOUNT7);
+    pushField("Material7", dataRow.MATERIAL7);
+    pushField("Process7", dataRow.PROCESS7);
     pushField("Part_Name8", dataRow.PARTNAME8);
     pushField("Part_No8", dataRow.PARTNO8);
+    pushField("Lot_No8", dataRow.LOTNO8);
+    pushField("Amount8", dataRow.AMOUNT8);
+    pushField("Material8", dataRow.MATERIAL8);
+    pushField("Process8", dataRow.PROCESS8);
     pushField("Part_Name9", dataRow.PARTNAME9);
     pushField("Part_No9", dataRow.PARTNO9);
+    pushField("Lot_No9", dataRow.LOTNO9);
+    pushField("Amount9", dataRow.AMOUNT9);
+    pushField("Material9", dataRow.MATERIAL9);
+    pushField("Process9", dataRow.PROCESS9);
     pushField("Part_Name10", dataRow.PARTNAME10);
     pushField("Part_No10", dataRow.PARTNO10);
-    pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
+    pushField("Lot_No10", dataRow.LOTNO10);
+    pushField("Amount10", dataRow.AMOUNT10);
+    pushField("Material10", dataRow.MATERIAL10);
+    pushField("Process10", dataRow.PROCESS10);
+    // pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
     pushField("Take_Photo", dataRow.TAKEPHOTO);
     pushField("Start_Date", dataRow.STARTDATE);
     pushField("Time1", dataRow.TIME1);
@@ -621,6 +780,8 @@ router.post('/02SALTSPRAY/StartJob', async (req, res) => {
     pushField("Finish_Date10", dataRow.FINISHDATE10);
     pushField("Temp_Date10", dataRow.TEMPDATE10);
     pushField("Due_Date10", dataRow.DUEDATE10);
+    pushField("Temp_Date0", dataRow.TEMPDATE0);
+    pushField("Due_Date0", dataRow.DUEDATE0);
     pushField("Instrument", dataRow.INSTRUMENT);
     pushField("Method", dataRow.METHOD);
     pushField("Incharge", dataRow.INCHARGE);
@@ -744,29 +905,70 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     pushField("Report_No", dataRow.REPORTNO);
     pushField("Section", dataRow.SECTION);
     pushField("Requester", dataRow.REQUESTER);
+    pushField("Sampling_Date", dataRow.SAMPLINGDATE);
     pushField("Received_Date", dataRow.RECEIVEDDATE);
     pushField("Customer_Name", dataRow.CUSTOMERNAME);
     pushField("Part_Name1", dataRow.PARTNAME1);
     pushField("Part_No1", dataRow.PARTNO1);
+    pushField("Lot_No1", dataRow.LOTNO1);
+    pushField("Amount1", dataRow.AMOUNT1);
+    pushField("Material1", dataRow.MATERIAL1);
+    pushField("Process1", dataRow.PROCESS1);
     pushField("Part_Name2", dataRow.PARTNAME2);
     pushField("Part_No2", dataRow.PARTNO2);
+    pushField("Lot_No2", dataRow.LOTNO2);
+    pushField("Amount2", dataRow.AMOUNT2);
+    pushField("Material2", dataRow.MATERIAL2);
+    pushField("Process2", dataRow.PROCESS2);
     pushField("Part_Name3", dataRow.PARTNAME3);
     pushField("Part_No3", dataRow.PARTNO3);
+    pushField("Lot_No3", dataRow.LOTNO3);
+    pushField("Amount3", dataRow.AMOUNT3);
+    pushField("Material3", dataRow.MATERIAL3);
+    pushField("Process3", dataRow.PROCESS3);
     pushField("Part_Name4", dataRow.PARTNAME4);
     pushField("Part_No4", dataRow.PARTNO4);
+    pushField("Lot_No4", dataRow.LOTNO4);
+    pushField("Amount4", dataRow.AMOUNT4);
+    pushField("Material4", dataRow.MATERIAL4);
+    pushField("Process4", dataRow.PROCESS4);
     pushField("Part_Name5", dataRow.PARTNAME5);
     pushField("Part_No5", dataRow.PARTNO5);
+    pushField("Lot_No5", dataRow.LOTNO5);
+    pushField("Amount5", dataRow.AMOUNT5);
+    pushField("Material5", dataRow.MATERIAL5);
+    pushField("Process5", dataRow.PROCESS5);
     pushField("Part_Name6", dataRow.PARTNAME6);
     pushField("Part_No6", dataRow.PARTNO6);
+    pushField("Lot_No6", dataRow.LOTNO6);
+    pushField("Amount6", dataRow.AMOUNT6);
+    pushField("Material6", dataRow.MATERIAL6);
+    pushField("Process6", dataRow.PROCESS6);
     pushField("Part_Name7", dataRow.PARTNAME7);
     pushField("Part_No7", dataRow.PARTNO7);
+    pushField("Lot_No7", dataRow.LOTNO7);
+    pushField("Amount7", dataRow.AMOUNT7);
+    pushField("Material7", dataRow.MATERIAL7);
+    pushField("Process7", dataRow.PROCESS7);
     pushField("Part_Name8", dataRow.PARTNAME8);
     pushField("Part_No8", dataRow.PARTNO8);
+    pushField("Lot_No8", dataRow.LOTNO8);
+    pushField("Amount8", dataRow.AMOUNT8);
+    pushField("Material8", dataRow.MATERIAL8);
+    pushField("Process8", dataRow.PROCESS8);
     pushField("Part_Name9", dataRow.PARTNAME9);
     pushField("Part_No9", dataRow.PARTNO9);
+    pushField("Lot_No9", dataRow.LOTNO9);
+    pushField("Amount9", dataRow.AMOUNT9);
+    pushField("Material9", dataRow.MATERIAL9);
+    pushField("Process9", dataRow.PROCESS9);
     pushField("Part_Name10", dataRow.PARTNAME10);
     pushField("Part_No10", dataRow.PARTNO10);
-    pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
+    pushField("Lot_No10", dataRow.LOTNO10);
+    pushField("Amount10", dataRow.AMOUNT10);
+    pushField("Material10", dataRow.MATERIAL10);
+    pushField("Process10", dataRow.PROCESS10);
+    // pushField("Amount_Sample", dataRow.AMOUNTSAMPLE);
     pushField("Take_Photo", dataRow.TAKEPHOTO);
     pushField("Start_Date", dataRow.STARTDATE);
     pushField("Time1", dataRow.TIME1);
@@ -809,6 +1011,8 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     pushField("Finish_Date10", dataRow.FINISHDATE10);
     pushField("Temp_Date10", dataRow.TEMPDATE10);
     pushField("Due_Date10", dataRow.DUEDATE10);
+    pushField("Temp_Date0", dataRow.TEMPDATE0);
+    pushField("Due_Date0", dataRow.DUEDATE0);
     pushField("Instrument", dataRow.INSTRUMENT);
     pushField("Method", dataRow.METHOD);
     pushField("Incharge", dataRow.INCHARGE);
@@ -879,6 +1083,47 @@ router.post('/02SALTSPRAY/AddCustomer', async (req, res) => {
 
 });
 
+router.post('/02SALTSPRAY/AddUser', async (req, res) => {
+    //-------------------------------------
+    console.log("--AddUser--");
+    //-------------------------------------
+
+    let fields = [];
+    function pushField(name, value) {
+        if (value !== '' && value !== null && value !== 'null') {
+            fields.push(`[${name}] = '${value}'`);
+        }
+    }
+
+    pushField("UserName", req.body.UserName);
+    pushField("Password", req.body.Password);
+    pushField("Name", req.body.Name);
+    pushField("Section", req.body.Section);
+    pushField("Branch", req.body.Branch);
+    pushField("Roleid", req.body.Roleid);
+
+    let query = `
+    INSERT INTO [SALTSPRAY].[dbo].[Master_User] (
+      ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+    )
+    VALUES (
+      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+    )
+    `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Insert Success");
+        return res.status(200).json('เพิ่มข้อมูลสำเร็จ');
+    } else {
+        console.log("Insert Failed");
+        return res.status(400).json('เพิ่มข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
 router.post('/02SALTSPRAY/DeleteCustomer', async (req, res) => {
     //-------------------------------------
     console.log("--DeleteCustomer--");
@@ -888,6 +1133,27 @@ router.post('/02SALTSPRAY/DeleteCustomer', async (req, res) => {
 
     let query = `
     DELETE FROM [SALTSPRAY].[dbo].[Customer] WHERE ID = '${dataRow.ID}';
+    `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Delete Success");
+        return res.status(200).json('ลบข้อมูลสำเร็จ');
+    } else {
+        console.log("Delete Failed");
+        return res.status(400).json('ลบข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02SALTSPRAY/DeleteUser', async (req, res) => {
+    //-------------------------------------
+    console.log("--DeleteUser--");
+    //-------------------------------------
+    let query = `
+    DELETE FROM [SALTSPRAY].[dbo].[Master_User] WHERE ID = '${req.body.UserID}';
     `;
     // console.log(query);
     let db = await mssql.qurey(query);
