@@ -25,6 +25,7 @@ router.post('/02SALTSPRAY/Login', async (req, res) => {
                     "Section": findDB['recordsets'][0][0]['Section'],
                     "Roleid": findDB['recordsets'][0][0]['Roleid'] || '1',
                     "Branch": findDB['recordsets'][0][0]['Branch'],
+                    "Permission": findDB['recordsets'][0][0]['Permission'],
                     "return": 'OK'
                 }
             } else {
@@ -514,6 +515,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
         }
     }
 
+    pushField("Type", dataRow.TYPE);
     pushField("Request_No", dataRow.REQUESTNO);
     pushField("Report_No", dataRow.REPORTNO);
     pushField("Section", dataRow.SECTION);
@@ -671,6 +673,7 @@ router.post('/02SALTSPRAY/StartJob', async (req, res) => {
         }
     }
 
+    pushField("Type", dataRow.TYPE);
     pushField("Request_No", dataRow.REQUESTNO);
     pushField("Report_No", dataRow.REPORTNO);
     pushField("Section", dataRow.SECTION);
@@ -901,6 +904,7 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
         }
     }
 
+    pushField("Type", dataRow.TYPE);
     pushField("Request_No", dataRow.REQUESTNO);
     pushField("Report_No", dataRow.REPORTNO);
     pushField("Section", dataRow.SECTION);
