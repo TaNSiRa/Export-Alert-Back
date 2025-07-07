@@ -9,7 +9,7 @@ router.get('/02SARKPI/TEST', async (req, res) => {
 
 router.post('/02SALTSPRAY/Login', async (req, res) => {
     //-------------------------------------
-    console.log(req.body);
+    // console.log(req.body);
     let input = req.body;
     //-------------------------------------
     let output = { "return": 'NOK' }
@@ -17,7 +17,7 @@ router.post('/02SALTSPRAY/Login', async (req, res) => {
     let findDB = await mssql.qurey(query);
     try {
         if (findDB['recordsets'].length > 0) {
-            console.log(findDB['recordsets']);
+            // console.log(findDB['recordsets']);
             if (findDB['recordsets'][0][0]['Password'] === input['Password']) {
                 output = {
                     "UserName": findDB['recordsets'][0][0]['UserName'],
@@ -274,7 +274,7 @@ router.post('/02SALTSPRAY/TranferInstrument', async (req, res) => {
             SET Status = 'TRANSFER'
             WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'`;
         let updateResult = await mssql.qurey(updateQuery);
-        console.log(updateQuery);
+        // console.log(updateQuery);
 
         if (updateResult["rowsAffected"][0] > 0) {
             console.log("Update Success");
@@ -421,7 +421,7 @@ router.post('/02SALTSPRAY/TranferInstrument', async (req, res) => {
                 )
             `;
 
-            console.log(insertQuery);
+            // console.log(insertQuery);
             let insertResult = await mssql.qurey(insertQuery);
 
             if (insertResult["rowsAffected"][0] > 0) {
@@ -452,7 +452,7 @@ router.post('/02SALTSPRAY/SearchCustomer', async (req, res) => {
     // console.log(db);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
-        console.log("Alldata: " + buffer.length);
+        // console.log("Alldata: " + buffer.length);
         output = buffer;
         // console.log(output);
         return res.status(200).json(output);
@@ -474,7 +474,7 @@ router.post('/02SALTSPRAY/SearchIncharge', async (req, res) => {
     // console.log(db);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
-        console.log("Alldata: " + buffer.length);
+        // console.log("Alldata: " + buffer.length);
         output = buffer;
         // console.log(output);
         return res.status(200).json(output);
@@ -497,10 +497,10 @@ router.post('/02SALTSPRAY/CheckOldPassword', async (req, res) => {
     // console.log(query);
     // console.log(db);
     if (db["recordset"].length > 0) {
-        console.log('200');
+        // console.log('200');
         return res.status(200).json();
     } else {
-        console.log('400');
+        // console.log('400');
         return res.status(400).json('Old Password ไม่ถูกต้อง');
     }
     //-------------------------------------
@@ -548,7 +548,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     console.log("--EditData--");
     //-------------------------------------
     let dataRow = JSON.parse(req.body.dataRow);
-    console.log(dataRow);
+    // console.log(dataRow);
 
     let fields = [];
     function pushField(name, value) {
@@ -686,7 +686,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
         SET ${fields.join(',\n')}
         WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'
         `;
-    console.log(query);
+    // console.log(query);
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["rowsAffected"][0] > 0) {
@@ -1265,7 +1265,7 @@ router.post('/02SALTSPRAY/Holidays', async (req, res) => {
     // console.log(db);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
-        console.log("Alldata: " + buffer.length);
+        // console.log("Alldata: " + buffer.length);
         output = buffer;
         return res.status(200).json(output);
     } else {
@@ -1279,10 +1279,10 @@ router.post('/02SALTSPRAY/CheckSlotAndTimeOverlab', async (req, res) => {
     console.log("--CheckSlotAndTimeOverlab--");
     //-------------------------------------
     const { startDate, finishDate, checkBox, Instrument } = req.body;
-    console.log(startDate);
-    console.log(finishDate);
-    console.log(checkBox);
-    console.log(Instrument);
+    // console.log(startDate);
+    // console.log(finishDate);
+    // console.log(checkBox);
+    // console.log(Instrument);
     if (!startDate || !finishDate || !checkBox || !Instrument) {
         return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -1292,17 +1292,17 @@ router.post('/02SALTSPRAY/CheckSlotAndTimeOverlab', async (req, res) => {
         WHERE Instrument = '${Instrument}'
           AND Status NOT IN ('CANCEL', 'TRANSFER', 'FINISH') order by Request_No`;
         let result = await mssql.qurey(query);
-        console.log(query);
+        // console.log(query);
 
         const bookings = result.recordset;
         const newStart = new Date(startDate);
         const newFinish = new Date(finishDate);
         const newSlots = checkBox.split(',').map(s => s.trim());
-        console.log(bookings);
-        console.log(newStart);
-        console.log(newFinish);
-        console.log(newSlots);
-        console.log('-------------------');
+        // console.log(bookings);
+        // console.log(newStart);
+        // console.log(newFinish);
+        // console.log(newSlots);
+        // console.log('-------------------');
 
         const overlappedRequests = [];
 
@@ -1310,7 +1310,7 @@ router.post('/02SALTSPRAY/CheckSlotAndTimeOverlab', async (req, res) => {
             // const existingStart = new Date(booking.Start_Date);
             const existingStart = new Date(new Date(booking.Start_Date).getTime() - 7 * 60 * 60 * 1000);
             let latestFinish = null;
-            console.log('Start Date: ' + existingStart);
+            // console.log('Start Date: ' + existingStart);
             // หา Finish_Date ที่มีค่ามากที่สุด
             for (let i = 1; i <= 10; i++) {
                 const finishKey = `Finish_Date${i}`;
@@ -1319,14 +1319,14 @@ router.post('/02SALTSPRAY/CheckSlotAndTimeOverlab', async (req, res) => {
                     latestFinish = new Date(new Date(booking[finishKey]).getTime() - 7 * 60 * 60 * 1000);
                 }
             }
-            console.log('Finsih Date: ' + latestFinish);
+            // console.log('Finsih Date: ' + latestFinish);
             if (!latestFinish) continue;
 
             const timeOverlap = !(newFinish < existingStart || newStart > latestFinish);
-            console.log(timeOverlap);
+            // console.log(timeOverlap);
             // เปรียบเทียบ Slot
             const existingSlots = (booking.CheckBox || "").split(',').map(s => s.trim());
-            console.log(existingSlots);
+            // console.log(existingSlots);
             const slotOverlap = newSlots.some(slot => existingSlots.includes(slot));
 
             if (timeOverlap && slotOverlap) {
