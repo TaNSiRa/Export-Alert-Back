@@ -464,6 +464,28 @@ router.post('/02SALTSPRAY/SearchCustomer', async (req, res) => {
 
 });
 
+router.post('/02SALTSPRAY/SearchRequester', async (req, res) => {
+    //-------------------------------------
+    console.log("--SearchRequester--");
+    //-------------------------------------
+    let output = [];
+    let query = `SELECT * From [SALTSPRAY].[dbo].[Requester]`
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        // console.log("Alldata: " + buffer.length);
+        output = buffer;
+        // console.log(output);
+        return res.status(200).json(output);
+        // return res.status(400).json('ไม่พบข้อมูลลูกค้า');
+    } else {
+        return res.status(400).json('ไม่พบข้อมูลลูกค้า');
+    }
+    //-------------------------------------
+
+});
+
 router.post('/02SALTSPRAY/SearchIncharge', async (req, res) => {
     //-------------------------------------
     console.log("--SearchIncharge--");
@@ -1131,6 +1153,44 @@ router.post('/02SALTSPRAY/AddCustomer', async (req, res) => {
 
 });
 
+router.post('/02SALTSPRAY/AddRequester', async (req, res) => {
+    //-------------------------------------
+    console.log("--AddRequester--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+    // console.log(dataRow);
+
+    let fields = [];
+    function pushField(name, value) {
+        if (value !== '' && value !== null && value !== 'null') {
+            fields.push(`[${name}] = '${value}'`);
+        }
+    }
+
+    pushField("Requester_Name", dataRow.REQUESTER);
+
+    let query = `
+    INSERT INTO [SALTSPRAY].[dbo].[Requester] (
+      ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+    )
+    VALUES (
+      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+    )
+    `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Insert Success");
+        return res.status(200).json('เพิ่มข้อมูลสำเร็จ');
+    } else {
+        console.log("Insert Failed");
+        return res.status(400).json('เพิ่มข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
 router.post('/02SALTSPRAY/AddUser', async (req, res) => {
     //-------------------------------------
     console.log("--AddUser--");
@@ -1196,6 +1256,30 @@ router.post('/02SALTSPRAY/DeleteCustomer', async (req, res) => {
 
 });
 
+router.post('/02SALTSPRAY/DeleteRequester', async (req, res) => {
+    //-------------------------------------
+    console.log("--DeleteRequester--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+    // console.log(dataRow);
+
+    let query = `
+    DELETE FROM [SALTSPRAY].[dbo].[Requester] WHERE ID = '${dataRow.ID}';
+    `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Delete Success");
+        return res.status(200).json('ลบข้อมูลสำเร็จ');
+    } else {
+        console.log("Delete Failed");
+        return res.status(400).json('ลบข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
 router.post('/02SALTSPRAY/DeleteUser', async (req, res) => {
     //-------------------------------------
     console.log("--DeleteUser--");
@@ -1237,6 +1321,44 @@ router.post('/02SALTSPRAY/EditCustomer', async (req, res) => {
 
     let query = `
         UPDATE [SALTSPRAY].[dbo].[Customer]
+        SET ${fields.join(',\n')}
+        WHERE ID = '${dataRow.ID}'
+        `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Update Success");
+        return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
+        // return res.status(400).json('อัปเดทข้อมูลสำเร็จ');
+    } else {
+        console.log("Update Failed");
+        return res.status(400).json('อัปเดทข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02SALTSPRAY/EditRequester', async (req, res) => {
+    //-------------------------------------
+    console.log("--EditRequester--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+    // console.log(dataRow);
+
+    let fields = [];
+    function pushField(name, value) {
+        if (value !== '') {
+            fields.push(`[${name}] = '${value}'`);
+        } else {
+            fields.push(`[${name}] = NULL`);
+        }
+    }
+
+    pushField("Requester_Name", dataRow.CUSTOMER);
+
+    let query = `
+        UPDATE [SALTSPRAY].[dbo].[Requester]
         SET ${fields.join(',\n')}
         WHERE ID = '${dataRow.ID}'
         `;
