@@ -1355,7 +1355,7 @@ router.post('/02SALTSPRAY/EditRequester', async (req, res) => {
         }
     }
 
-    pushField("Requester_Name", dataRow.CUSTOMER);
+    pushField("Requester_Name", dataRow.REQUESTER);
 
     let query = `
         UPDATE [SALTSPRAY].[dbo].[Requester]
