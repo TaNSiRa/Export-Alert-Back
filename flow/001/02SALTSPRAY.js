@@ -424,7 +424,7 @@ router.post('/02SALTSPRAY/TranferInstrument', async (req, res) => {
                     ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
                 )
                 VALUES (
-                    ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+                    ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
                 )
             `;
 
@@ -1014,9 +1014,12 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     // }
 
     function pushField(name, value) {
+        console.log(name, value);
         if (value !== '' && value !== null && value !== 'null') {
             const escapedValue = value.toString().replace(/'/g, "''");
             fields.push(`[${name}] = N'${escapedValue}'`);
+            console.log(`[${name}] = N'${escapedValue}'`);
+
         }
     }
 
@@ -1142,16 +1145,17 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     pushField("Status", dataRow.STATUS);
     pushField("Remark", dataRow.REMARK);
     pushField("CheckBox", dataRow.CHECKBOX);
-
+    console.log('-----------------');
+    console.log(fields);
     let query = `
     INSERT INTO [SALTSPRAY].[dbo].[DataTable] (
       ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
     )
     VALUES (
-      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+     ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
     )
     `;
-    // console.log(query);
+    console.log(query);
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["rowsAffected"][0] > 0) {
@@ -1194,7 +1198,7 @@ router.post('/02SALTSPRAY/AddCustomer', async (req, res) => {
       ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
     )
     VALUES (
-      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+      ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
     )
     `;
     // console.log(query);
@@ -1239,7 +1243,7 @@ router.post('/02SALTSPRAY/AddRequester', async (req, res) => {
       ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
     )
     VALUES (
-      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+      ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
     )
     `;
     // console.log(query);
@@ -1287,7 +1291,7 @@ router.post('/02SALTSPRAY/AddUser', async (req, res) => {
       ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
     )
     VALUES (
-      ${fields.map(field => field.split('=')[1].trim()).join(',\n')}
+      ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
     )
     `;
     // console.log(query);
