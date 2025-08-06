@@ -282,9 +282,16 @@ router.post('/02SALTSPRAY/TranferInstrument', async (req, res) => {
             // STEP 2: CREATE INSERT QUERY
             let fields = [];
 
+            // function pushField(name, value) {
+            //     if (value !== '' && value !== null && value !== 'null') {
+            //         fields.push(`[${name}] = '${value}'`);
+            //     }
+            // }
+
             function pushField(name, value) {
                 if (value !== '' && value !== null && value !== 'null') {
-                    fields.push(`[${name}] = '${value}'`);
+                    const escapedValue = value.toString().replace(/'/g, "''");
+                    fields.push(`[${name}] = N'${escapedValue}'`);
                 }
             }
 
@@ -573,9 +580,18 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
@@ -731,9 +747,18 @@ router.post('/02SALTSPRAY/StartJob', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
@@ -888,9 +913,18 @@ router.post('/02SALTSPRAY/CancelJob', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
@@ -926,9 +960,18 @@ router.post('/02SALTSPRAY/FinishJob', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
@@ -964,11 +1007,19 @@ router.post('/02SALTSPRAY/AddData', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '' && value !== null && value !== 'null') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     }
+    // }
+
     function pushField(name, value) {
         if (value !== '' && value !== null && value !== 'null') {
-            fields.push(`[${name}] = '${value}'`);
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         }
     }
+
 
     pushField("Type", dataRow.TYPE);
     pushField("Request_No", dataRow.REQUESTNO);
@@ -1123,9 +1174,16 @@ router.post('/02SALTSPRAY/AddCustomer', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '' && value !== null && value !== 'null') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     }
+    // }
+
     function pushField(name, value) {
         if (value !== '' && value !== null && value !== 'null') {
-            fields.push(`[${name}] = '${value}'`);
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         }
     }
 
@@ -1161,9 +1219,16 @@ router.post('/02SALTSPRAY/AddRequester', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '' && value !== null && value !== 'null') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     }
+    // }
+
     function pushField(name, value) {
         if (value !== '' && value !== null && value !== 'null') {
-            fields.push(`[${name}] = '${value}'`);
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         }
     }
 
@@ -1197,9 +1262,16 @@ router.post('/02SALTSPRAY/AddUser', async (req, res) => {
     //-------------------------------------
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '' && value !== null && value !== 'null') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     }
+    // }
+
     function pushField(name, value) {
         if (value !== '' && value !== null && value !== 'null') {
-            fields.push(`[${name}] = '${value}'`);
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         }
     }
 
@@ -1309,9 +1381,18 @@ router.post('/02SALTSPRAY/EditCustomer', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
@@ -1347,9 +1428,18 @@ router.post('/02SALTSPRAY/EditRequester', async (req, res) => {
     // console.log(dataRow);
 
     let fields = [];
+    // function pushField(name, value) {
+    //     if (value !== '') {
+    //         fields.push(`[${name}] = '${value}'`);
+    //     } else {
+    //         fields.push(`[${name}] = NULL`);
+    //     }
+    // }
+
     function pushField(name, value) {
-        if (value !== '') {
-            fields.push(`[${name}] = '${value}'`);
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
         } else {
             fields.push(`[${name}] = NULL`);
         }
