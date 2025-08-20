@@ -272,7 +272,7 @@ router.post('/02SALTSPRAY/TranferInstrument', async (req, res) => {
         let updateQuery = `
             UPDATE [SALTSPRAY].[dbo].[DataTable]
             SET Status = 'TRANSFER'
-            WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'`;
+            WHERE ID = '${dataRow.ID}' and Status = '${dataRow.STATUS}'`;
         let updateResult = await mssql.qurey(updateQuery);
         // console.log(updateQuery);
 
@@ -722,7 +722,7 @@ router.post('/02SALTSPRAY/EditData', async (req, res) => {
     let query = `
         UPDATE [SALTSPRAY].[dbo].[DataTable]
         SET ${fields.join(',\n')}
-        WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'
+        WHERE ID = '${dataRow.ID}' and Status = '${dataRow.STATUS}'
         `;
     // console.log(query);
     let db = await mssql.qurey(query);
@@ -888,7 +888,7 @@ router.post('/02SALTSPRAY/StartJob', async (req, res) => {
     let query = `
         UPDATE [SALTSPRAY].[dbo].[DataTable]
         SET ${fields.join(',\n')}
-        WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'
+        WHERE ID = '${dataRow.ID}' and Status = '${dataRow.STATUS}'
         `;
     // console.log(query);
     let db = await mssql.qurey(query);
@@ -935,7 +935,7 @@ router.post('/02SALTSPRAY/CancelJob', async (req, res) => {
     let query = `
         UPDATE [SALTSPRAY].[dbo].[DataTable]
         SET ${fields.join(',\n')}
-        WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'
+        WHERE ID = '${dataRow.ID}' and Status = '${dataRow.STATUS}'
         `;
     // console.log(query);
     let db = await mssql.qurey(query);
@@ -982,7 +982,7 @@ router.post('/02SALTSPRAY/FinishJob', async (req, res) => {
     let query = `
         UPDATE [SALTSPRAY].[dbo].[DataTable]
         SET ${fields.join(',\n')}
-        WHERE Request_No = '${dataRow.REQUESTNO}' and Status = '${dataRow.STATUS}'
+        WHERE ID = '${dataRow.ID}' and Status = '${dataRow.STATUS}'
         `;
     // console.log(query);
     let db = await mssql.qurey(query);
