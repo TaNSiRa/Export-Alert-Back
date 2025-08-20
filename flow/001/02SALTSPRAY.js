@@ -64,23 +64,49 @@ router.post('/02SALTSPRAY/DataTable', async (req, res) => {
 router.post('/02SALTSPRAY/DataforTableStatus', async (req, res) => {
     //-------------------------------------
     console.log("--DataforTableStatus--");
-    //-------------------------------------
-    let output = [];
-    let query = `SELECT TOP 100 * From [SALTSPRAY].[dbo].[DataTable] 
-    ORDER BY Request_No, Status, Instrument`;
-    let db = await mssql.qurey(query);
-    // console.log(db);
-    if (db["recordsets"].length > 0) {
-        let buffer = db["recordsets"][0];
-        // console.log("Alldata: " + buffer.length);
-        // console.log(buffer);
-        output = buffer;
-        return res.status(200).json(output);
-    } else {
-        return res.status(400).json('ไม่พบข้อมูลในตาราง');
+    // console.log(req.body);
+
+    try {
+        let { Year, Month } = req.body;
+
+        // ถ้าไม่ได้ส่งมา → ใช้ปีและเดือนปัจจุบัน
+        const now = new Date();
+        if (!Array.isArray(Year) || Year.length === 0) {
+            Year = [now.getFullYear()];
+        }
+        if (!Array.isArray(Month) || Month.length === 0) {
+            Month = [now.getMonth() + 1]; // JS month 0-based → SQL month 1-based
+        }
+
+        // สร้างเงื่อนไข WHERE
+        let yearCondition = Year.map(y => `YEAR(Start_Date) = ${y}`).join(" OR ");
+        let monthCondition = Month.map(m => `MONTH(Start_Date) = ${m}`).join(" OR ");
+
+        let whereClause = `(${yearCondition}) AND (${monthCondition})`;
+
+        let query = `
+            SELECT * 
+            FROM [SALTSPRAY].[dbo].[DataTable]
+            WHERE ${whereClause}
+            ORDER BY Request_No, Status, Instrument
+        `;
+
+        // console.log("SQL Query:", query);
+
+        let db = await mssql.qurey(query);
+
+        if (db["recordsets"].length > 0) {
+            let buffer = db["recordsets"][0];
+            return res.status(200).json(buffer);
+        } else {
+            return res.status(400).json('ไม่พบข้อมูลในตาราง');
+        }
+    } catch (err) {
+        console.error("Error DataforTableStatus:", err);
+        return res.status(500).json("Server Error");
     }
-    //-------------------------------------
 });
+
 
 router.post('/02SALTSPRAY/CalendarInMonth', async (req, res) => {
     console.log("--CalendarInMonth--");
