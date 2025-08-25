@@ -88,7 +88,7 @@ router.post('/02SALTSPRAY/DataforTableStatus', async (req, res) => {
             SELECT * 
             FROM [SALTSPRAY].[dbo].[DataTable]
             WHERE ${whereClause}
-            ORDER BY Request_No, Status, Instrument
+            ORDER BY Request_No DESC, Status, Instrument 
         `;
 
         // console.log("SQL Query:", query);
