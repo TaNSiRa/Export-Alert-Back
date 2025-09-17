@@ -94,12 +94,59 @@ router.post('/02MASTERSAR/getUser', async (req, res) => {
     }
 });
 
-router.post('/02MASTERSAR/getGroupNameTS', async (req, res) => {
+router.post('/02MASTERSAR/getDropdown', async (req, res) => {
+    try {
+        //-------------------------------------
+        console.log("--getDropdown--");
+        //-------------------------------------
+        let query = `SELECT * From [SAR].[dbo].[Master_Dropdown];`;
+        let db = await mssql.qurey(query);
+
+        if (db["recordsets"].length > 0) {
+            let buffer = db["recordsets"][0];
+
+            let groupNameTS = buffer.map(row => row.GroupNameTS).filter(val => val && val.trim() !== "");
+            let sampleGroup = buffer.map(row => row.SampleGroup).filter(val => val && val.trim() !== "");
+            let sampleType = buffer.map(row => row.SampleType).filter(val => val && val.trim() !== "");
+
+            let output = {
+                groupNameTS,
+                sampleGroup,
+                sampleType
+            };
+
+            return res.status(200).json(output);
+        } else {
+            return res.status(400).json('ไม่พบข้อมูล');
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server Error", error: err.message });
+    }
+});
+
+router.post('/02MASTERSAR/getMasterTS', async (req, res) => {
     //-------------------------------------
-    console.log("--getGroupNameTS--");
+    console.log("--getMasterTS--");
     //-------------------------------------
     let output = [];
-    let query = `SELECT DISTINCT GroupNameTS From [SAR].[dbo].[Routine_MasterPatternTS] ORDER BY GroupNameTS;`;
+    let query = `SELECT * From [SAR].[dbo].[Routine_MasterPatternTS] ORDER BY CustFull, SampleNo, ItemNo;`;
+    let db = await mssql.qurey(query);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        output = buffer;
+        return res.status(200).json(output);
+    } else {
+        return res.status(400).json('ไม่พบข้อมูล');
+    }
+});
+
+router.post('/02MASTERSAR/getMasterLab', async (req, res) => {
+    //-------------------------------------
+    console.log("--getMasterLab--");
+    //-------------------------------------
+    let output = [];
+    let query = `SELECT * From [SAR].[dbo].[Routine_MasterPatternLab] ORDER BY CustFull, SampleNo, ItemNo;`;
     let db = await mssql.qurey(query);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
@@ -278,6 +325,104 @@ router.post('/02MASTERSAR/confirmEditData', async (req, res) => {
     }
 });
 
+router.post('/02MASTERSAR/addNewCustomer', async (req, res) => {
+    try {
+        //-------------------------------------
+        console.log("--addNewCustomer--");
+        //-------------------------------------
+        const {
+            CustFull,
+            CustShort,
+            Incharge,
+            TYPE,
+            GROUP,
+            MKTGROUP,
+            FRE,
+            REPORTITEMS
+        } = req.body.data;
+
+        let fields = [];
+        function pushField(name, value) {
+            if (value !== '') {
+                const escapedValue = value.toString().replace(/'/g, "''");
+                fields.push(`[${name}] = '${escapedValue}'`);
+            } else {
+                fields.push(`[${name}] = NULL`);
+            }
+        }
+
+        pushField("CustFull", CustFull);
+        pushField("CustShort", CustShort);
+        pushField("Incharge", Incharge);
+        pushField("SampleNo", '1');
+        // pushField("GroupNameTS", '-');
+        // pushField("SampleGroup", '-');
+        // pushField("SampleType", '-');
+        // pushField("SampleTank", '-');
+        // pushField("SampleName", '-');
+        // pushField("ProcessReportName", '-');
+        pushField("ItemNo", '1');
+        // pushField("ItemName", '-');
+        // pushField("StdFactor", '-');
+        // pushField("StdMin", '-');
+        // pushField("StdSymbol", '-');
+        // pushField("StdMax", '-');
+        // pushField("ControlRange", '-');
+        // pushField("SubLeader", '-');
+        // pushField("GL", '-');
+        // pushField("JP", '-');
+        // pushField("DGM", '-');
+        // pushField("PatternReport", '-');
+        // pushField("ReportOrder", '-');
+        pushField("TYPE", TYPE);
+        pushField("GROUP", GROUP);
+        pushField("MKTGROUP", MKTGROUP);
+        pushField("FRE", FRE);
+        pushField("REPORTITEMS", REPORTITEMS);
+
+        let query = `
+        INSERT INTO [SAR].[dbo].[Routine_MasterPatternTS]
+        (
+        ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+        )
+        VALUES (
+        ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
+        )
+        `;
+        let insertResult = await mssql.qurey(query);
+        console.log(insertResult);
+        if (insertResult["rowsAffected"][0] > 0) {
+            fields = [];
+            pushField("CustFull", CustFull);
+            pushField("CustShort", CustShort);
+            pushField("Incharge", Incharge);
+            pushField("SampleNo", '1');
+            pushField("ItemNo", '1');
+
+            let query = `
+            INSERT INTO [SAR].[dbo].[Routine_MasterPatternLab]
+            (
+            ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+            )
+            VALUES (
+            ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
+            )
+            `;
+            let insertResult2 = await mssql.qurey(query);
+            if (insertResult2["rowsAffected"][0] > 0) {
+                return res.status(200).json({ message: "Add new customer successfully" });
+            } else {
+                return res.status(400).json({ message: 'Add new customer failed' });
+            }
+
+        } else {
+            return res.status(400).json({ message: 'Add new customer failed' });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({ message: "Server Error", error: err.message });
+    }
+});
 
 function formatDateTime(isoString) {
     const date = new Date(isoString);
