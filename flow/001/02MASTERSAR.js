@@ -424,6 +424,51 @@ router.post('/02MASTERSAR/addNewCustomer', async (req, res) => {
     }
 });
 
+router.post('/02MASTERSAR/CheckOldPassword', async (req, res) => {
+    //-------------------------------------
+    console.log("--CheckOldPassword--");
+    //-------------------------------------
+    // console.log(req.body);
+    let query = `SELECT * From [SAR].[dbo].[Master_User] WHERE UserName = '${req.body.UserName}' 
+                AND Password = '${req.body.OldPassword}'`;
+    let db = await mssql.qurey(query);
+    // console.log(query);
+    // console.log(db);
+    if (db["recordset"].length > 0) {
+        // console.log('200');
+        return res.status(200).json();
+    } else {
+        // console.log('400');
+        return res.status(400).json('Old Password ไม่ถูกต้อง');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02MASTERSAR/UpdatePassword', async (req, res) => {
+    //-------------------------------------
+    console.log("--UpdatePassword--");
+    //-------------------------------------
+    let query = `
+        UPDATE [SAR].[dbo].[Master_User]
+        SET Password = '${req.body.NewPassword}'
+        WHERE UserName = '${req.body.UserName}'
+        `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Update Success");
+        return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
+        // return res.status(400).json('อัปเดทข้อมูลสำเร็จ');
+    } else {
+        console.log("Update Failed");
+        return res.status(400).json('อัปเดทข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
+});
+
 function formatDateTime(isoString) {
     const date = new Date(isoString);
 
