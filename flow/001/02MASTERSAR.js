@@ -196,7 +196,7 @@ router.post('/02MASTERSAR/getItemTS', async (req, res) => {
     console.log("--getItemTS--");
     //-------------------------------------
     let output = [];
-    let query = `SELECT DISTINCT ItemName From [SAR].[dbo].[Routine_MasterPatternTS] ORDER BY ItemName;`;
+    let query = `SELECT ItemName From [SAR].[dbo].[DropDownItemTS] ORDER BY ItemName;`;
     let db = await mssql.qurey(query);
     if (db["recordsets"].length > 0) {
         let buffer = db["recordsets"][0];
@@ -244,8 +244,8 @@ router.post('/02MASTERSAR/getItemLab', async (req, res) => {
     console.log("--getItemLab--");
     //-------------------------------------
     let output = [];
-    let query = `SELECT DISTINCT ItemName, InstrumentName 
-    From [SAR].[dbo].[Routine_MasterPatternLab] 
+    let query = `SELECT ItemName, InstrumentName 
+    From [SAR].[dbo].[DropDownItemLab] 
     ORDER BY InstrumentName, ItemName;`;
     let db = await mssql.qurey(query);
     if (db["recordsets"].length > 0) {
