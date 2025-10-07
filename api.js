@@ -3,7 +3,8 @@ const router = express.Router();
 
 
 router.use(require("./flow/001/01TEST"))
-router.use(require("./flow/001/02MASTERSAR"))
+router.use(require("./flow/001/02EXPORTALERT"))
+router.use(require("./flow/001/03SENDMAIL"))
 
 // router.use(require("./flow/003/flow003"))
 // router.use(require("./flow/004/flow004"))
