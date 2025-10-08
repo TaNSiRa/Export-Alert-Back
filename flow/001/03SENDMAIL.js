@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const express = require("express");
 const router = express.Router();
 var mssql = require('../../function/mssql');
+require('dotenv').config();
 
 // ========================================
 // 1. Configuration
