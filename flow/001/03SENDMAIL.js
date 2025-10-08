@@ -342,7 +342,7 @@ function generateEmailHTML(statusMap) {
     </p>
     <p style="margin-top: 8px;">
         If you want to access the system, click 
-        <a href="http://172.23.10.51:12125/" target="_blank" style="color: #1a73e8; text-decoration: underline;">
+        <a href="http://172.23.10.168:12125/" target="_blank" style="color: #1a73e8; text-decoration: underline;">
             here
         </a>.
     </p>
