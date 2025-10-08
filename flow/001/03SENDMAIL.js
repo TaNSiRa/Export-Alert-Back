@@ -369,6 +369,13 @@ function generateSummaryStats(statusMap) {
     );
     const totalStatuses = Object.keys(statusMap).length;
 
+    let totalComplete = 0;
+    for (const [status, items] of Object.entries(statusMap)) {
+        if (status.toLowerCase().includes("complete")) {
+            totalComplete += items.length;
+        }
+    }
+
     return `
     <div class="summary-stats">
       <div class="stat-card">
@@ -378,6 +385,10 @@ function generateSummaryStats(statusMap) {
       <div class="stat-card">
         <div class="stat-number">${totalStatuses}</div>
         <div class="stat-label">Active Statuses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${totalComplete}</div>
+        <div class="stat-label">Complete Statuses</div>
       </div>
     </div>
   `;
