@@ -367,7 +367,10 @@ function generateSummaryStats(statusMap) {
         (sum, items) => sum + items.length,
         0
     );
-    const totalStatuses = Object.keys(statusMap).length;
+
+    const totalStatuses = Object.keys(statusMap).filter(
+        status => !status.toLowerCase().includes("complete")
+    ).length;
 
     let totalComplete = 0;
     for (const [status, items] of Object.entries(statusMap)) {
