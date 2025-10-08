@@ -637,7 +637,9 @@ router.get("/03SENDMAIL/previewEmail", async (req, res) => {
       FROM [Export_Alert].[dbo].[data_table]) 
       SELECT TOP 10000 * 
       FROM R 
-      WHERE rn = 1 
+      WHERE rn = 1
+      AND MONTH(etd) = MONTH(GETDATE())
+      AND YEAR(etd) = YEAR(GETDATE())
       ORDER BY user_input_date DESC;`;
 
         let db = await mssql.qurey(query);
