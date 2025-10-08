@@ -490,6 +490,8 @@ async function sendDailyReport(recipients) {
       SELECT TOP 10000 * 
       FROM R 
       WHERE rn = 1 
+      AND MONTH(etd) = MONTH(GETDATE())
+      AND YEAR(etd) = YEAR(GETDATE())
       ORDER BY user_input_date DESC;`;
 
         let db = await mssql.qurey(query);
@@ -545,7 +547,7 @@ function scheduleDailyEmail() {
     // Cron format: นาที ชั่วโมง วัน เดือน วันในสัปดาห์
     // '30 8 * * *' = ทุกวันเวลา 8:30 น.
     cron.schedule(
-        "30 8 * * *",
+        "30 8 * * 1-5",
         async () => {
             console.log(
                 "⏰ Running scheduled daily report at",
