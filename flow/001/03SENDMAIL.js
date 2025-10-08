@@ -319,17 +319,22 @@ function generateEmailHTML(statusMap) {
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1>📊 Daily Shipment Progress Report</h1>
-        <p>Generated on ${new Date().toLocaleDateString("th-TH", {
+  <div class="header">
+    <h1>
+      📊 Daily Shipment Progress Report in 
+      ${new Date().toLocaleString("en-US", { month: "short", year: "numeric" })}
+    </h1>
+    <p>
+      Generated on ${new Date().toLocaleDateString("th-TH", {
         year: "numeric",
         month: "long",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-    })}</p>
-      </div>
-      
+    })}
+    </p>
+    </div>
+    </div>
       <div class="content">
         ${generateSummaryStats(statusMap)}
         ${sectionsHTML}
