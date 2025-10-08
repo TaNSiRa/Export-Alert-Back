@@ -336,9 +336,18 @@ function generateEmailHTML(statusMap) {
       </div>
       
       <div class="footer">
-        <p>🔔 This is an automated daily report from Export Alert System</p>
-        <p style="margin-top: 8px;">For any questions, please contact the logistics team</p>
-      </div>
+    <p>🔔 This is an automated daily report from Export Alert System</p>
+    <p style="margin-top: 8px;">
+        For any questions, please contact the automation team
+    </p>
+    <p style="margin-top: 8px;">
+        If you want to access the system, click 
+        <a href="http://172.23.10.51:12125/" target="_blank" style="color: #1a73e8; text-decoration: underline;">
+            here
+        </a>.
+    </p>
+    </div>
+
     </div>
   </body>
   </html>
