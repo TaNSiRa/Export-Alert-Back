@@ -379,15 +379,15 @@ function generateSummaryStats(statusMap) {
     return `
     <div class="summary-stats">
       <div class="stat-card">
-        <div class="stat-number">${totalShipments}</div>
+        <div class="stat-number">${totalShipments} color: blue;</div>
         <div class="stat-label">Total Shipments</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${totalStatuses}</div>
+        <div class="stat-number">${totalStatuses} color: orange;</div>
         <div class="stat-label">Active Statuses</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${totalComplete}</div>
+        <div class="stat-number">${totalComplete} color: green;</div>
         <div class="stat-label">Complete Statuses</div>
       </div>
     </div>
