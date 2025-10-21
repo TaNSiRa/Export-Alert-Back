@@ -45,13 +45,16 @@ router.post('/02EXPORTALERT/getDataTable', async (req, res) => {
     //-------------------------------------
     let output = [];
     let query = `WITH R AS (
-    SELECT  *,
-            ROW_NUMBER() OVER (PARTITION BY po_no ORDER BY user_input_date DESC) AS rn
-    FROM [Export_Alert].[dbo].[data_table])
-    SELECT TOP 10000 *
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY po_no ORDER BY user_input_date DESC) AS rn
+    FROM [Export_Alert].[dbo].[data_table]
+    )
+    SELECT *
     FROM R
     WHERE rn = 1
-    ORDER BY user_input_date DESC;`;
+      AND etd >= DATEADD(MONTH, -6, GETDATE())                    
+    ORDER BY user_input_date DESC;
+    `;
     let db = await mssql.qurey(query);
     // console.log(db);
     if (db["recordsets"].length > 0) {
@@ -71,27 +74,40 @@ router.post('/02EXPORTALERT/getDropdown', async (req, res) => {
         //-------------------------------------
         console.log("--getDropdown--");
         //-------------------------------------
-        let query = `SELECT * From [Export_Alert].[dbo].[master_material];`;
-        let db = await mssql.qurey(query);
 
-        if (db["recordsets"].length > 0) {
-            let buffer = db["recordsets"][0];
+        let queryMaterial = `SELECT * FROM [Export_Alert].[dbo].[master_material];`;
+        let dbMaterial = await mssql.qurey(queryMaterial);
+
+        let queryUom = `SELECT * FROM [Export_Alert].[dbo].[master_uom];`;
+        let dbUom = await mssql.qurey(queryUom);
+
+        if (dbMaterial["recordsets"].length > 0) {
+            let buffer = dbMaterial["recordsets"][0];
+
             let custshortArr = buffer
                 .filter(row => row.custshort && row.custshort.trim() !== "" && row.customer_id)
                 .map(row => `${row.custfull} || ${row.custshort} || ${row.customer_id}`);
+            let custshort = [...new Set(custshortArr)];
 
-            let custshort = [...new Set(custshortArr)]; // distinct
-
-            // mat_description | mat_no
             let materialArr = buffer
                 .filter(row => row.mat_description && row.mat_description.trim() !== "" && row.mat_no)
                 .map(row => `${row.mat_description} || ${row.mat_no} || ${row.mat_lead_time}`);
+            let material = [...new Set(materialArr)];
 
-            let material = [...new Set(materialArr)]; // distinct
+            let uom = [];
+            if (dbUom["recordsets"].length > 0) {
+                let uomBuffer = dbUom["recordsets"][0];
+                uom = [...new Set(
+                    uomBuffer
+                        .filter(row => row.uom && row.uom.trim() !== "")
+                        .map(row => row.uom)
+                )];
+            }
 
             let output = {
                 custshort,
-                material
+                material,
+                uom
             };
 
             return res.status(200).json(output);
@@ -102,6 +118,121 @@ router.post('/02EXPORTALERT/getDropdown', async (req, res) => {
         console.error(err);
         return res.status(500).json({ message: "Server Error", error: err.message });
     }
+});
+
+router.post('/02EXPORTALERT/SearchUOM', async (req, res) => {
+    //-------------------------------------
+    console.log("--SearchUOM--");
+    //-------------------------------------
+    let output = [];
+    let query = `SELECT * From [Export_Alert].[dbo].[master_uom] order by uom`;
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        // console.log("Alldata: " + buffer.length);
+        output = buffer;
+        // console.log(output);
+        return res.status(200).json(output);
+        // return res.status(400).json('ไม่พบข้อมูลลูกค้า');
+    } else {
+        return res.status(400).json('ไม่พบข้อมูลลูกค้า');
+    }
+    //-------------------------------------
+
+});
+
+router.post('/02EXPORTALERT/AddUOM', async (req, res) => {
+    //-------------------------------------
+    console.log("--AddUOM--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+
+    let fields = [];
+
+    function pushField(name, value) {
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
+        }
+    }
+
+    pushField("uom", dataRow.uom);
+
+    let query = `
+    INSERT INTO [Export_Alert].[dbo].[master_uom] (
+      ${fields.map(field => field.split('=')[0].trim()).join(',\n')}
+    )
+    VALUES (
+      ${fields.map(field => field.split('=').slice(1).join('=').trim()).join(',\n')}
+    )
+    `;
+    let db = await mssql.qurey(query);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Insert Success");
+        return res.status(200).json('เพิ่มข้อมูลสำเร็จ');
+    } else {
+        console.log("Insert Failed");
+        return res.status(400).json('เพิ่มข้อมูลไม่สำเร็จ');
+    }
+});
+
+router.post('/02EXPORTALERT/EditUOM', async (req, res) => {
+    //-------------------------------------
+    console.log("--EditUOM--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+
+    let fields = [];
+
+    function pushField(name, value) {
+        if (value !== '' && value !== null && value !== 'null') {
+            const escapedValue = value.toString().replace(/'/g, "''");
+            fields.push(`[${name}] = N'${escapedValue}'`);
+        } else {
+            fields.push(`[${name}] = NULL`);
+        }
+    }
+
+    pushField("uom", dataRow.uom);
+
+    let query = `
+        UPDATE [Export_Alert].[dbo].[master_uom]
+        SET ${fields.join(',\n')}
+        WHERE id = '${dataRow.id}'
+        `;
+    let db = await mssql.qurey(query);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Update Success");
+        return res.status(200).json('อัปเดทข้อมูลสำเร็จ');
+    } else {
+        console.log("Update Failed");
+        return res.status(400).json('อัปเดทข้อมูลไม่สำเร็จ');
+    }
+});
+
+router.post('/02EXPORTALERT/DeleteUOM', async (req, res) => {
+    //-------------------------------------
+    console.log("--DeleteUOM--");
+    //-------------------------------------
+    let dataRow = JSON.parse(req.body.dataRow);
+    // console.log(dataRow);
+
+    let query = `
+    DELETE FROM [Export_Alert].[dbo].[master_uom] WHERE id = '${dataRow.id}';
+    `;
+    // console.log(query);
+    let db = await mssql.qurey(query);
+    // console.log(db);
+    if (db["rowsAffected"][0] > 0) {
+        console.log("Delete Success");
+        return res.status(200).json('ลบข้อมูลสำเร็จ');
+    } else {
+        console.log("Delete Failed");
+        return res.status(400).json('ลบข้อมูลไม่สำเร็จ');
+    }
+    //-------------------------------------
+
 });
 
 router.post('/02EXPORTALERT/addNewPO', async (req, res) => {
@@ -211,6 +342,33 @@ router.post('/02EXPORTALERT/nextPlan', async (req, res) => {
     pushField("status_date", now);
     pushField("status_due", formatDateToSQL2(dataRow.status_due));
 
+    const currentStatus = dataRow.prev_status; // ส่งมาจาก Flutter
+    const actionColumnMap = {
+        'Receive PO': 'receive_po_date',
+        'Sale Order in SAP': 'sale_order',
+        'Proforma.INV+PL': 'proforma',
+        'Book shipment': 'book_shipment',
+        'Receive booking confirmation': 'receive_booking',
+        'Acknowledgement': 'acknowledgement',
+        'Delivery Order in SAP': 'delivery_order',
+        'Loading Sheet': 'loading_sheet',
+        'Confirm Export Entry': 'confirm_export_entry',
+        'Loading Date': 'loading_date',
+        'Confirm Bill of Loading (B/L)': 'confirm_bill',
+        'ETD': 'etd',
+        'Confirm Insurance': 'confirm_insurance',
+        'Post goods issue & QC report': 'post_and_qc',
+        'Send shipping document to customer': 'send_document',
+        'Issue invoice for accounting': 'issue_invoice',
+        'Receive shipping&forwarder billing': 'receive_shipping'
+    };
+
+    const actionBase = actionColumnMap[currentStatus];
+    if (actionBase) {
+        const actionColumn = `${actionBase}_action`;
+        pushField(actionColumn, now);
+    }
+
     let query = `
         UPDATE [Export_Alert].[dbo].[data_table]
         SET ${fields.join(',\n')}
@@ -263,6 +421,33 @@ router.post('/02EXPORTALERT/updateN2', async (req, res) => {
     pushField("status", dataRow.status);
     pushField("status_date", now);
     pushField("status_due", formatDateToSQL2(dataRow.status_due));
+
+    const currentStatus = dataRow.prev_status; // ส่งมาจาก Flutter
+    const actionColumnMap = {
+        'Receive PO': 'receive_po_date',
+        'Sale Order in SAP': 'sale_order',
+        'Proforma.INV+PL': 'proforma',
+        'Book shipment': 'book_shipment',
+        'Receive booking confirmation': 'receive_booking',
+        'Acknowledgement': 'acknowledgement',
+        'Delivery Order in SAP': 'delivery_order',
+        'Loading Sheet': 'loading_sheet',
+        'Confirm Export Entry': 'confirm_export_entry',
+        'Loading Date': 'loading_date',
+        'Confirm Bill of Loading (B/L)': 'confirm_bill',
+        'ETD': 'etd',
+        'Confirm Insurance': 'confirm_insurance',
+        'Post goods issue & QC report': 'post_and_qc',
+        'Send shipping document to customer': 'send_document',
+        'Issue invoice for accounting': 'issue_invoice',
+        'Receive shipping&forwarder billing': 'receive_shipping'
+    };
+
+    const actionBase = actionColumnMap[currentStatus];
+    if (actionBase) {
+        const actionColumn = `${actionBase}_action`;
+        pushField(actionColumn, now);
+    }
 
     let query = `
         UPDATE [Export_Alert].[dbo].[data_table]
@@ -376,6 +561,49 @@ router.post('/02EXPORTALERT/updateEdit', async (req, res) => {
     }
     //-------------------------------------
 
+});
+
+router.post('/02EXPORTALERT/getAllCustomer', async (req, res) => {
+    //-------------------------------------
+    console.log("--getAllCustomer--");
+    //-------------------------------------
+    let output = [];
+    let query = `WITH R AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY custfull ORDER BY custfull DESC) AS rn
+    FROM [Export_Alert].[dbo].[master_material]
+    )
+    SELECT *
+    FROM R
+    WHERE rn = 1
+    ORDER BY custfull DESC;
+    `;
+    let db = await mssql.qurey(query);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        output = buffer;
+        return res.status(200).json(output);
+    } else {
+        return res.status(400).json('ไม่พบข้อมูล');
+    }
+});
+
+router.post('/02EXPORTALERT/masterDetail', async (req, res) => {
+    //-------------------------------------
+    console.log("--masterDetail--");
+    //-------------------------------------
+    let output = [];
+    let query = `SELECT * From [Export_Alert].[dbo].[master_material] 
+                 WHERE CustShort = '${req.body.CustShort}'
+                 order by mat_no;`;
+    let db = await mssql.qurey(query);
+    if (db["recordsets"].length > 0) {
+        let buffer = db["recordsets"][0];
+        output = buffer;
+        return res.status(200).json(output);
+    } else {
+        return res.status(400).json('ไม่พบข้อมูล');
+    }
 });
 
 router.post('/02EXPORTALERT/CheckOldPassword', async (req, res) => {
