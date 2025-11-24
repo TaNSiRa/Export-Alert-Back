@@ -9,16 +9,16 @@ require("dotenv").config();
 // 1. Configuration
 // ========================================
 const emailConfig = {
-    host: "smtp.office365.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.mail365_user,
-        pass: process.env.mail365_pass,
-    },
-    tls: {
-        rejectUnauthorized: false,
-    },
+  host: "smtp.office365.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.mail365_user,
+    pass: process.env.mail365_pass,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
 };
 
 // สร้าง transporter
@@ -28,67 +28,67 @@ const transporter = nodemailer.createTransport(emailConfig);
 // 2. Function: จัดกลุ่มข้อมูลตาม status
 // ========================================
 function groupDataByStatus(data) {
-    const statusMap = {};
+  const statusMap = {};
 
-    data.forEach((item) => {
-        if (item.status && item.status.trim() !== "") {
-            if (!statusMap[item.status]) {
-                statusMap[item.status] = [];
-            }
-            statusMap[item.status].push(item);
-        }
-    });
+  data.forEach((item) => {
+    if (item.status && item.status.trim() !== "") {
+      if (!statusMap[item.status]) {
+        statusMap[item.status] = [];
+      }
+      statusMap[item.status].push(item);
+    }
+  });
 
-    return statusMap;
+  return statusMap;
 }
 
 // ========================================
 // 3. Function: สร้าง HTML Email Template
 // ========================================
 function generateEmailHTML(statusMap) {
-    const statusConfig = [
-        { name: "Receive PO", icon: "🛒", color: "#4CAF50" },
-        { name: "Sale Order in SAP", icon: "📋", color: "#2196F3" },
-        { name: "Proforma.INV+PL", icon: "📄", color: "#FF9800" },
-        { name: "Book shipment", icon: "📦", color: "#9C27B0" },
-        { name: "Receive booking confirmation", icon: "📅", color: "#00BCD4" },
-        { name: "Acknowledgement", icon: "✅", color: "#009688" },
-        { name: "Delivery Order in SAP", icon: "🚚", color: "#3F51B5" },
-        { name: "Loading Sheet", icon: "📊", color: "#795548" },
-        { name: "Confirm Export Entry", icon: "✈️", color: "#FF5722" },
-        { name: "Loading Date", icon: "🚛", color: "#E91E63" },
-        { name: "Confirm Bill of Loading (B/L)", icon: "📃", color: "#CDDC39" },
-        { name: "ETD", icon: "🛫", color: "#F44336" },
-        { name: "Confirm Insurance", icon: "🛡️", color: "#607D8B" },
-        { name: "Post goods issue & QC report", icon: "✔️", color: "#FFC107" },
-        {
-            name: "Send shipping document to customer",
-            icon: "📤",
-            color: "#673AB7",
-        },
-        { name: "Issue invoice for accounting", icon: "🧾", color: "#4CAF50" },
-        {
-            name: "Receive shipping&forwarder billing",
-            icon: "💰",
-            color: "#8BC34A",
-        },
-    ];
+  const statusConfig = [
+    { name: "Receive PO", icon: "🛒", color: "#4CAF50" },
+    { name: "Sale Order in SAP", icon: "📋", color: "#2196F3" },
+    { name: "Proforma.INV+PL", icon: "📄", color: "#FF9800" },
+    { name: "Book shipment", icon: "📦", color: "#9C27B0" },
+    { name: "Receive booking confirmation", icon: "📅", color: "#00BCD4" },
+    { name: "Acknowledgement", icon: "✅", color: "#009688" },
+    { name: "Delivery Order in SAP", icon: "🚚", color: "#3F51B5" },
+    { name: "Loading Sheet", icon: "📊", color: "#795548" },
+    { name: "Confirm Export Entry", icon: "✈️", color: "#FF5722" },
+    { name: "Loading Date", icon: "🚛", color: "#E91E63" },
+    { name: "Confirm Bill of Loading (B/L)", icon: "📃", color: "#CDDC39" },
+    { name: "ETD", icon: "🛫", color: "#F44336" },
+    { name: "Confirm Insurance", icon: "🛡️", color: "#607D8B" },
+    { name: "Post goods issue & QC report", icon: "✔️", color: "#FFC107" },
+    {
+      name: "Send shipping document to customer",
+      icon: "📤",
+      color: "#673AB7",
+    },
+    { name: "Issue invoice for accounting", icon: "🧾", color: "#4CAF50" },
+    {
+      name: "Receive shipping&forwarder billing",
+      icon: "💰",
+      color: "#8BC34A",
+    },
+  ];
 
-    let sectionsHTML = "";
+  let sectionsHTML = "";
 
-    statusConfig.forEach((config) => {
-        const statusData = statusMap[config.name] || [];
-        if (statusData.length > 0) {
-            sectionsHTML += generateStatusSection(
-                config.name,
-                config.icon,
-                config.color,
-                statusData
-            );
-        }
-    });
+  statusConfig.forEach((config) => {
+    const statusData = statusMap[config.name] || [];
+    if (statusData.length > 0) {
+      sectionsHTML += generateStatusSection(
+        config.name,
+        config.icon,
+        config.color,
+        statusData
+      );
+    }
+  });
 
-    return `
+  return `
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -326,12 +326,12 @@ function generateEmailHTML(statusMap) {
     </h1>
     <p>
       Generated on ${new Date().toLocaleDateString("th-TH", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    })}
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
     </p>
     </div>
     </div>
@@ -363,23 +363,23 @@ function generateEmailHTML(statusMap) {
 // 4. Function: สร้าง Summary Statistics
 // ========================================
 function generateSummaryStats(statusMap) {
-    const totalShipments = Object.values(statusMap).reduce(
-        (sum, items) => sum + items.length,
-        0
-    );
+  const totalShipments = Object.values(statusMap).reduce(
+    (sum, items) => sum + items.length,
+    0
+  );
 
-    const totalStatuses = Object.keys(statusMap).filter(
-        status => !status.toLowerCase().includes("complete")
-    ).length;
+  const totalStatuses = Object.keys(statusMap).filter(
+    status => !status.toLowerCase().includes("complete")
+  ).length;
 
-    let totalComplete = 0;
-    for (const [status, items] of Object.entries(statusMap)) {
-        if (status.toLowerCase().includes("complete")) {
-            totalComplete += items.length;
-        }
+  let totalComplete = 0;
+  for (const [status, items] of Object.entries(statusMap)) {
+    if (status.toLowerCase().includes("complete")) {
+      totalComplete += items.length;
     }
+  }
 
-    return `
+  return `
     <div class="summary-stats">
       <div class="stat-card">
         <div class="stat-number">${totalShipments}</div>
@@ -401,25 +401,25 @@ function generateSummaryStats(statusMap) {
 // 5. Function: สร้าง HTML สำหรับแต่ละ Status
 // ========================================
 function formatDate(dateStr) {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    if (isNaN(date)) return "-";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือน 0-11
-    const year = String(date.getFullYear()).slice(-2); // เอา 2 ตัวท้าย
-    return `${day}-${month}-${year}`;
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date)) return "-";
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // เดือน 0-11
+  const year = String(date.getFullYear()).slice(-2); // เอา 2 ตัวท้าย
+  return `${day}-${month}-${year}`;
 }
 
 function generateStatusSection(statusName, icon, color, data) {
-    const cardsHTML = data
-        .map(
-            (item, index) => `
+  const cardsHTML = data
+    .map(
+      (item, index) => `
     <div class="shipment-card">
       <div class="card-header" style="background-color: ${color}30;">
         <div class="shipment-badge" style="background: linear-gradient(135deg, ${color}, ${adjustColor(
-                color,
-                -20
-            )});color: black;">
+        color,
+        -20
+      )});color: black;">
           Shipment ${index + 1}
         </div>
         <div class="customer-name" style="color: black;">
@@ -463,10 +463,10 @@ function generateStatusSection(statusName, icon, color, data) {
       </div>
     </div>
   `
-        )
-        .join("");
+    )
+    .join("");
 
-    return `
+  return `
   <div class="status-section">
     <div class="status-header" 
          style="background-color: ${color}30; color: black;">
@@ -487,22 +487,22 @@ function generateStatusSection(statusName, icon, color, data) {
 // 6. Helper Function: ปรับสีให้เข้มขึ้น
 // ========================================
 function adjustColor(color, amount) {
-    const num = parseInt(color.replace("#", ""), 16);
-    const r = Math.max(0, Math.min(255, (num >> 16) + amount));
-    const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + amount));
-    const b = Math.max(0, Math.min(255, (num & 0x0000ff) + amount));
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+  const num = parseInt(color.replace("#", ""), 16);
+  const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+  const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + amount));
+  const b = Math.max(0, Math.min(255, (num & 0x0000ff) + amount));
+  return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
 }
 
 // ========================================
 // 7. Function: ส่งอีเมล
 // ========================================
 async function sendDailyReport(recipients) {
-    try {
-        console.log("🔄 Fetching data from database...");
+  try {
+    console.log("🔄 Fetching data from database...");
 
-        // ดึงข้อมูลจาก SQL (ใช้โค้ดเดิมของคุณ)
-        let query = `WITH R AS ( 
+    // ดึงข้อมูลจาก SQL (ใช้โค้ดเดิมของคุณ)
+    let query = `WITH R AS ( 
       SELECT  *, 
               ROW_NUMBER() OVER (PARTITION BY po_no ORDER BY user_input_date DESC) AS rn 
       FROM [Export_Alert].[dbo].[data_table]) 
@@ -513,125 +513,125 @@ async function sendDailyReport(recipients) {
       AND YEAR(etd) = YEAR(GETDATE())
       ORDER BY user_input_date DESC;`;
 
-        let db = await mssql.qurey(query);
+    let db = await mssql.qurey(query);
 
-        if (!db["recordsets"] || db["recordsets"].length === 0) {
-            console.log("❌ No data found in database");
-            return;
-        }
-
-        const data = db["recordsets"][0];
-        console.log(`✅ Fetched ${data.length} records`);
-
-        // จัดกลุ่มข้อมูล
-        const statusMap = groupDataByStatus(data);
-        console.log(`📊 Grouped into ${Object.keys(statusMap).length} statuses`);
-
-        // สร้าง HTML
-        const htmlContent = generateEmailHTML(statusMap);
-
-        // ตั้งค่าอีเมล
-        const mailOptions = {
-            from: emailConfig.auth.user,
-            to: recipients.join(", "),
-            subject: `📊 Daily Shipment Report - ${new Date().toLocaleDateString(
-                "th-TH"
-            )}`,
-            html: htmlContent,
-        };
-
-        // const mailOptions = {
-        //     from: 'es1_auto@thaiparker.co.th',
-        //     to: 'sirawit@thaiparker.co.th',
-        //     subject: 'test',
-        //     // html: `test`
-        // };
-
-        // ส่งอีเมล
-        console.log("📧 Sending email...");
-        const info = await transporter.sendMail(mailOptions);
-        console.log("✅ Email sent successfully:", info.messageId);
-
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error("❌ Error sending email:", error);
-        throw error;
+    if (!db["recordsets"] || db["recordsets"].length === 0) {
+      console.log("❌ No data found in database");
+      return;
     }
+
+    const data = db["recordsets"][0];
+    console.log(`✅ Fetched ${data.length} records`);
+
+    // จัดกลุ่มข้อมูล
+    const statusMap = groupDataByStatus(data);
+    console.log(`📊 Grouped into ${Object.keys(statusMap).length} statuses`);
+
+    // สร้าง HTML
+    const htmlContent = generateEmailHTML(statusMap);
+
+    // ตั้งค่าอีเมล
+    const mailOptions = {
+      from: emailConfig.auth.user,
+      to: recipients.join(", "),
+      subject: `📊 Daily Shipment Report - ${new Date().toLocaleDateString(
+        "th-TH"
+      )}`,
+      html: htmlContent,
+    };
+
+    // const mailOptions = {
+    //     from: 'es1_auto@thaiparker.co.th',
+    //     to: 'sirawit@thaiparker.co.th',
+    //     subject: 'test',
+    //     // html: `test`
+    // };
+
+    // ส่งอีเมล
+    console.log("📧 Sending email...");
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully:", info.messageId);
+
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    throw error;
+  }
 }
 
 // ========================================
 // 8. ตั้งเวลาส่งอีเมลอัตโนมัติ (ทุกวัน 8:30 น.)
 // ========================================
 function scheduleDailyEmail() {
-    // Cron format: นาที ชั่วโมง วัน เดือน วันในสัปดาห์
-    // '30 8 * * *' = ทุกวันเวลา 8:30 น.
-    cron.schedule(
-        "30 8 * * 1-5",
-        async () => {
-            console.log(
-                "⏰ Running scheduled daily report at",
-                new Date().toLocaleString("th-TH")
-            );
+  // Cron format: นาที ชั่วโมง วัน เดือน วันในสัปดาห์
+  // '30 8 * * *' = ทุกวันเวลา 8:30 น.
+  cron.schedule(
+    "30 8 * * 1-5",
+    async () => {
+      console.log(
+        "⏰ Running scheduled daily report at",
+        new Date().toLocaleString("th-TH")
+      );
 
-            try {
-                let query = `SELECT email FROM [Export_Alert].[dbo].[master_user] WHERE [status] = 'Active'`;
-                let findDB = await mssql.qurey(query);
+      try {
+        let query = `SELECT email FROM [Export_Alert].[dbo].[master_user] WHERE [status] = 'Active'`;
+        let findDB = await mssql.qurey(query);
 
-                const recipients = findDB.recordset.map((row) => row.email);
+        const recipients = findDB.recordset.map((row) => row.email);
 
-                // const recipients = [
-                //   "sirawit@thaiparker.co.th",
-                //   // 'recipient2@company.com',
-                // ];
+        // const recipients = [
+        //   "sirawit@thaiparker.co.th",
+        //   // 'recipient2@company.com',
+        // ];
 
-                await sendDailyReport(recipients);
-            } catch (error) {
-                console.error("Failed to send scheduled email:", error);
-            }
-        },
-        {
-            timezone: "Asia/Bangkok", // ตั้งเขตเวลาเป็นเวลาไทย
-        }
-    );
+        await sendDailyReport(recipients);
+      } catch (error) {
+        console.error("Failed to send scheduled email:", error);
+      }
+    },
+    {
+      timezone: "Asia/Bangkok", // ตั้งเขตเวลาเป็นเวลาไทย
+    }
+  );
 
-    console.log("✅ Daily email scheduler started (8:30 AM Bangkok time)");
+  console.log("✅ Daily email scheduler started (8:30 AM Bangkok time)");
 }
 
 // ========================================
 // 9. API Endpoint สำหรับส่งอีเมลด้วยตนเอง
 // ========================================
 router.post("/03SENDMAIL/sendDailyReport", async (req, res) => {
-    try {
-        const { recipients } = req.body;
+  try {
+    const { recipients } = req.body;
 
-        if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
-            return res.status(400).json({
-                error: "กรุณาระบุอีเมลผู้รับอย่างน้อย 1 ที่อยู่",
-            });
-        }
-
-        const result = await sendDailyReport(recipients);
-
-        return res.status(200).json({
-            success: true,
-            message: "ส่งอีเมลสำเร็จ",
-            messageId: result.messageId,
-        });
-    } catch (error) {
-        console.error("Error in sendDailyReport endpoint:", error);
-        return res.status(500).json({
-            error: "เกิดข้อผิดพลาดในการส่งอีเมล",
-            details: error.message,
-        });
+    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+      return res.status(400).json({
+        error: "กรุณาระบุอีเมลผู้รับอย่างน้อย 1 ที่อยู่",
+      });
     }
+
+    const result = await sendDailyReport(recipients);
+
+    return res.status(200).json({
+      success: true,
+      message: "ส่งอีเมลสำเร็จ",
+      messageId: result.messageId,
+    });
+  } catch (error) {
+    console.error("Error in sendDailyReport endpoint:", error);
+    return res.status(500).json({
+      error: "เกิดข้อผิดพลาดในการส่งอีเมล",
+      details: error.message,
+    });
+  }
 });
 
 // ========================================
 // 10. API Endpoint สำหรับทดสอบ Email Template
 // ========================================
 router.get("/03SENDMAIL/previewEmail", async (req, res) => {
-    try {
-        let query = `WITH R AS ( 
+  try {
+    let query = `WITH R AS ( 
       SELECT  *, 
               ROW_NUMBER() OVER (PARTITION BY po_no ORDER BY user_input_date DESC) AS rn 
       FROM [Export_Alert].[dbo].[data_table]) 
@@ -642,26 +642,26 @@ router.get("/03SENDMAIL/previewEmail", async (req, res) => {
       AND YEAR(etd) = YEAR(GETDATE())
       ORDER BY user_input_date DESC;`;
 
-        let db = await mssql.qurey(query);
+    let db = await mssql.qurey(query);
 
-        if (!db["recordsets"] || db["recordsets"].length === 0) {
-            return res.status(400).json({ error: "ไม่พบข้อมูลในตาราง" });
-        }
-
-        const data = db["recordsets"][0];
-        const statusMap = groupDataByStatus(data);
-        const htmlContent = generateEmailHTML(statusMap);
-
-        // ส่ง HTML กลับไปแสดงในบราวเซอร์
-        res.setHeader("Content-Type", "text/html");
-        res.send(htmlContent);
-    } catch (error) {
-        console.error("Error in previewEmail endpoint:", error);
-        return res.status(500).json({
-            error: "เกิดข้อผิดพลาดในการสร้าง preview",
-            details: error.message,
-        });
+    if (!db["recordsets"] || db["recordsets"].length === 0) {
+      return res.status(400).json({ error: "ไม่พบข้อมูลในตาราง" });
     }
+
+    const data = db["recordsets"][0];
+    const statusMap = groupDataByStatus(data);
+    const htmlContent = generateEmailHTML(statusMap);
+
+    // ส่ง HTML กลับไปแสดงในบราวเซอร์
+    res.setHeader("Content-Type", "text/html");
+    res.send(htmlContent);
+  } catch (error) {
+    console.error("Error in previewEmail endpoint:", error);
+    return res.status(500).json({
+      error: "เกิดข้อผิดพลาดในการสร้าง preview",
+      details: error.message,
+    });
+  }
 });
 
 // ========================================
@@ -671,9 +671,9 @@ router.get("/03SENDMAIL/previewEmail", async (req, res) => {
 scheduleDailyEmail();
 
 router.get("/03SENDMAIL/getData", async (req, res) => {
-    console.log("--getData--");
-    try {
-        let query = `WITH R AS ( 
+  console.log("--getData--");
+  try {
+    let query = `WITH R AS ( 
       SELECT  *, 
               ROW_NUMBER() OVER (PARTITION BY po_no ORDER BY user_input_date DESC) AS rn 
       FROM [Export_Alert].[dbo].[data_table]) 
@@ -684,12 +684,58 @@ router.get("/03SENDMAIL/getData", async (req, res) => {
       AND YEAR(etd) = YEAR(GETDATE())
       ORDER BY user_input_date DESC;`;
 
-        let db = await mssql.qurey(query);
-        const data = db["recordsets"][0];
-        res.json(data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    let db = await mssql.qurey(query);
+    const data = db["recordsets"][0];
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ========================================
+// 12. API Endpoint สำหรับส่งอีเมลทดสอบแบบง่าย
+// ========================================
+router.post("/03SENDMAIL/sendTestMail", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({
+        error: "กรุณาระบุอีเมลผู้รับเป็น string",
+      });
     }
+
+    // สร้างเนื้อหาอีเมลทดสอบ
+    const htmlContent = `
+      <h2>📧 Test Email</h2>
+      <p>This is a test email from Export Alert System.</p>
+      <p>Sent at: ${new Date().toLocaleString("th-TH")}</p>
+      `;
+
+    const mailOptions = {
+      from: emailConfig.auth.user,
+      to: email,
+      subject: "🧪 Test Email - Export Alert System",
+      html: htmlContent,
+    };
+
+    console.log("📧 Sending test email to", email);
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log("✅ Test email sent:", info.messageId);
+
+    return res.status(200).json({
+      success: true,
+      message: "ส่งอีเมลทดสอบสำเร็จ",
+      messageId: info.messageId,
+    });
+  } catch (error) {
+    console.error("❌ Error sending test email:", error);
+    return res.status(500).json({
+      error: "เกิดข้อผิดพลาดในการส่งอีเมลทดสอบ",
+      details: error.message,
+    });
+  }
 });
 
 // Export functions
